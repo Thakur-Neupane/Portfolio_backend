@@ -5,6 +5,8 @@ import {
   logout,
   getUser,
   updateProfile,
+  updatePassword,
+  getUserForPortfolio,
 } from "../controller/userController.js";
 const router = express.Router();
 import { isAuthenticated } from "../middlewares/auth.js";
@@ -15,5 +17,7 @@ router.get("/logout", isAuthenticated, logout);
 router.get("/logout", isAuthenticated, logout);
 router.get("/me", isAuthenticated, getUser);
 router.put("/update/me", isAuthenticated, updateProfile);
+router.put("/update/password", isAuthenticated, updatePassword);
+router.get("/me/portfolio", getUserForPortfolio);
 
 export default router;

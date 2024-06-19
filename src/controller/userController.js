@@ -162,3 +162,39 @@ export const updateProfile = catchAsyncErrors(async (req, res, next) => {
     user,
   });
 });
+
+export const updatePassword = catchAsyncErrors(async (req, res, next) => {
+  const { currentPassword, newPassword, confirmNewPassword } = req.body;
+  if (!currentPassword || !newPassword || !confirmNewPassword) {
+    return next(new ErrorHandler("Please Fill All Fields.", 400));
+  }
+  const user = await User.findById(req.user.id).select("+password");
+  const isPasswordMatched = await user.comparePassword(currentPassword);
+
+  if (!isPasswordMatched) {
+    return next(new ErrorHandler("Incorrect current password", 400));
+  }
+  if (newPassword !== confirmNewPassword) {
+    return next(
+      new ErrorHandler(
+        "Confirm password and Confirm new password donot match ",
+        400
+      )
+    );
+  }
+  user.password = new Password();
+  await user.save();
+  res.status(200).json({
+    success: true,
+    message: "Password Updated",
+  });
+});
+
+export const getUserForPortfolio = catchAsyncErrors(async (req, res, next) => {
+  const id = "6672667e72142089a9189b9e";
+  const user = await User.findById(id);
+  res.status(200).json({
+    success: true,
+    user,
+  });
+});
