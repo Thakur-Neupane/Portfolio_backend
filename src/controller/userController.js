@@ -3,58 +3,61 @@ import ErrorHandler from "../middlewares/error.js";
 import { User } from "../models/userSchema.js";
 import { v2 as cloudinary } from "cloudinary";
 import { generateToken } from "../utils/jwtToken.js";
-import { sendEmail } from "../utils/sendEmail.js";
+import crypto from "crypto";
+import { sendEmail } from "../utils/sendemail.js";
 
 export const register = catchAsyncErrors(async (req, res, next) => {
   if (!req.files || Object.keys(req.files).length === 0) {
-    return next(new ErrorHandler("Avatar and resume are required.", 400));
+    return next(new ErrorHandler("Avatar Required!", 400));
   }
   const { avatar, resume } = req.files;
 
+  //POSTING AVATAR
   const cloudinaryResponseForAvatar = await cloudinary.uploader.upload(
     avatar.tempFilePath,
-    { folder: "AVATARS" }
+    { folder: "PORTFOLIO AVATAR" }
   );
   if (!cloudinaryResponseForAvatar || cloudinaryResponseForAvatar.error) {
     console.error(
-      "Cloudinary Error: ",
-      cloudinaryResponseForAvatar.error || "Unknown Cloudinary Error"
+      "Cloudinary Error:",
+      cloudinaryResponseForAvatar.error || "Unknown Cloudinary error"
     );
+    return next(new ErrorHandler("Failed to upload avatar to Cloudinary", 500));
   }
 
+  //POSTING RESUME
   const cloudinaryResponseForResume = await cloudinary.uploader.upload(
     resume.tempFilePath,
-    { folder: "MY_RESUME" }
+    { folder: "PORTFOLIO RESUME" }
   );
   if (!cloudinaryResponseForResume || cloudinaryResponseForResume.error) {
     console.error(
-      "Cloudinary Error: ",
-      cloudinaryResponseForResume.error || "Unknown Cloudinary Error"
+      "Cloudinary Error:",
+      cloudinaryResponseForResume.error || "Unknown Cloudinary error"
     );
+    return next(new ErrorHandler("Failed to upload resume to Cloudinary", 500));
   }
-
   const {
     fullName,
     email,
     phone,
     aboutMe,
     password,
-    githubURL,
     portfolioURL,
+    githubURL,
     instagramURL,
     twitterURL,
     facebookURL,
     linkedInURL,
   } = req.body;
-
   const user = await User.create({
     fullName,
     email,
     phone,
     aboutMe,
     password,
-    githubURL,
     portfolioURL,
+    githubURL,
     instagramURL,
     twitterURL,
     facebookURL,
@@ -74,32 +77,29 @@ export const register = catchAsyncErrors(async (req, res, next) => {
 export const login = catchAsyncErrors(async (req, res, next) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    return next(new ErrorHandler("Email and password are required!"));
+    return next(new ErrorHandler("Provide Email And Password!", 400));
   }
   const user = await User.findOne({ email }).select("+password");
-
   if (!user) {
-    return next(new ErrorHandler("Invalid Email or Password !"));
+    return next(new ErrorHandler("Invalid Email Or Password!", 404));
   }
-
   const isPasswordMatched = await user.comparePassword(password);
-
   if (!isPasswordMatched) {
-    return next(new ErrorHandler("Invalid Email or Password"));
+    return next(new ErrorHandler("Invalid Email Or Password", 401));
   }
-  generateToken(user, "LoggedIn", 200, res);
+  generateToken(user, "Login Successfully!", 200, res);
 });
 
 export const logout = catchAsyncErrors(async (req, res, next) => {
   res
     .status(200)
     .cookie("token", "", {
-      expires: newDate(Date.now()),
       httpOnly: true,
+      expires: new Date(Date.now()),
     })
     .json({
       success: true,
-      message: "LoggedOut",
+      message: "Logged Out!",
     });
 });
 
@@ -228,4 +228,33 @@ export const forgotPassword = catchAsyncErrors(async (req, res, next) => {
     await user.save();
     return next(new ErrorHandler(error.message, 500));
   }
+});
+
+export const resetPassword = catchAsyncErrors(async (req, res, next) => {
+  const { token } = req.params;
+  const resetPaasswordToken = crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
+
+  const user = await User.findOne({
+    resetTokenToken,
+    resetPasswordExpire: { $gt: Date.now() },
+  });
+  if (!user) {
+    return next(
+      new ErrorHandler(
+        "Reset password token is invalid or hasbeen expired.",
+        400
+      )
+    );
+  }
+  if (req.body.password !== req.body.confirmPassword) {
+    return next(new ErrorHandler("Password and confirm password don't match!"));
+  }
+  user.password = req.body.password;
+  user.resetPasswordExpire = undefined;
+  user.resetPaasswordToken = undefined;
+  await user.save();
+  generateToken(user, "Reset Password Successfully! ", 200, res);
 });
