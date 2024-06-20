@@ -19,7 +19,7 @@ app.get("/", (req, res, next) => {
 });
 
 app.use("*", (req, res, next) => {
-  const err = new Error("404 Page nto found");
+  const err = new Error("404 Page not found");
   err.statusCode = 404;
   next(err);
 });
