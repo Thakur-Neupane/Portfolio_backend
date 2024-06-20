@@ -12,7 +12,7 @@ export const register = catchAsyncErrors(async (req, res, next) => {
   }
   const { avatar, resume } = req.files;
 
-  //POSTING AVATAR
+  //FOR AVATAR
   const cloudinaryResponseForAvatar = await cloudinary.uploader.upload(
     avatar.tempFilePath,
     { folder: "PORTFOLIO AVATAR" }
@@ -25,7 +25,7 @@ export const register = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Failed to upload Avatar to Cloudinary", 500));
   }
 
-  //POSTING RESUME
+  //FOR RESUME
   const cloudinaryResponseForResume = await cloudinary.uploader.upload(
     resume.tempFilePath,
     { folder: "PORTFOLIO RESUME" }

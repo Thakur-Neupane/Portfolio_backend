@@ -1,5 +1,5 @@
 import express from "express";
-import dotenv from "dotenv";
+
 import cookieParser from "cookie-parser";
 import fileUpload from "express-fileupload";
 import cors from "cors";
@@ -10,9 +10,9 @@ import userRouter from "./src/router/userRoutes.js";
 import timelineRouter from "./src/router/timelineRoutes.js";
 import applicationRouter from "./src/router/softwareApplicationRoutes.js";
 import skillRouter from "./src/router/skillRoutes.js";
+import projectRouter from "./src/router/projectRoutes.js";
 
 const app = express();
-dotenv.config({ path: "./config/config.env" });
 
 app.use(
   cors({
@@ -37,6 +37,7 @@ app.use("/api/v1/user", userRouter);
 app.use("/api/v1/timeline", timelineRouter);
 app.use("/api/v1/softwareapplication", applicationRouter);
 app.use("/api/v1/skill", skillRouter);
+app.use("/api/v1/project", projectRouter);
 
 connectDb();
 app.use(errorMiddleware);
