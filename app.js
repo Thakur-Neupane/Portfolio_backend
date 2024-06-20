@@ -9,6 +9,7 @@ import messageRouter from "./src/router/messageRoutes.js";
 import userRouter from "./src/router/userRoutes.js";
 import timelineRouter from "./src/router/timelineRoutes.js";
 import applicationRouter from "./src/router/softwareApplicationRoutes.js";
+import skillRouter from "./src/router/skillRoutes.js";
 
 const app = express();
 dotenv.config({ path: "./config/config.env" });
@@ -35,6 +36,7 @@ app.use("/api/v1/message", messageRouter);
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/timeline", timelineRouter);
 app.use("/api/v1/softwareapplication", applicationRouter);
+app.use("/api/v1/skill", skillRouter);
 
 connectDb();
 app.use(errorMiddleware);

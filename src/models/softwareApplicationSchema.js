@@ -1,6 +1,9 @@
 import mongoose from "mongoose";
+
 const softwareApplicationSchema = new mongoose.Schema({
-  name: String,
+  name: {
+    type: String,
+  },
   svg: {
     public_id: {
       type: String,
@@ -12,6 +15,7 @@ const softwareApplicationSchema = new mongoose.Schema({
     },
   },
 });
+
 export const SoftwareApplication = mongoose.model(
   "SoftwareApplication",
   softwareApplicationSchema
