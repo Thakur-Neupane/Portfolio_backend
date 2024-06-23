@@ -71,7 +71,10 @@ export const register = catchAsyncErrors(async (req, res, next) => {
       url: cloudinaryResponseForResume.secure_url,
     },
   });
-  generateToken(user, " User Registered!", 201, res);
+  res.status(200).json({
+    success: true,
+    message: "User Registered!",
+  });
 });
 
 export const login = catchAsyncErrors(async (req, res, next) => {
@@ -104,7 +107,7 @@ export const logout = catchAsyncErrors(async (req, res, next) => {
 });
 
 export const getUser = catchAsyncErrors(async (req, res, next) => {
-  const user = await User.findById(req.user.id);
+  const user = await User.findById(req.user._id);
   res.status(200).json({
     success: true,
     user,
@@ -201,39 +204,6 @@ export const getUserForPortfolio = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
-//FORGOT PASSWORD
-export const forgotPassword = catchAsyncErrors(async (req, res, next) => {
-  const user = await User.findOne({ email: req.body.email });
-  if (!user) {
-    return next(new ErrorHandler("User Not Found!", 404));
-  }
-  const resetToken = user.getResetPasswordToken();
-
-  await user.save({ validateBeforeSave: false });
-
-  const resetPasswordUrl = `${process.env.DASHBOARD_URL}/password/reset/${resetToken}`;
-
-  const message = `Your Reset Password Token is:- \n\n ${resetPasswordUrl}  \n\n If 
-  You've not requested this email then, please ignore it.`;
-
-  try {
-    await sendEmail({
-      email: user.email,
-      subject: `Personal Portfolio Dashboard Password Recovery`,
-      message,
-    });
-    res.status(201).json({
-      success: true,
-      message: `Email sent to ${user.email} successfully`,
-    });
-  } catch (error) {
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpire = undefined;
-    await user.save({ validateBeforeSave: false });
-    return next(new ErrorHandler(error.message, 500));
-  }
-});
-
 //RESET PASSWORD
 export const resetPassword = catchAsyncErrors(async (req, res, next) => {
   const { token } = req.params;
@@ -264,4 +234,37 @@ export const resetPassword = catchAsyncErrors(async (req, res, next) => {
   await user.save();
 
   generateToken(user, "Reset Password Successfully!", 200, res);
+});
+
+//FORGOT PASSWORD
+export const forgotPassword = catchAsyncErrors(async (req, res, next) => {
+  const user = await User.findOne({ email: req.body.email });
+  if (!user) {
+    return next(new ErrorHandler("User Not Found!", 404));
+  }
+  const resetToken = user.getResetPasswordToken();
+
+  await user.save({ validateBeforeSave: false });
+
+  const resetPasswordUrl = `${process.env.DASHBOARD_URL}/password/reset/${resetToken}`;
+
+  const message = `Your Reset Password Token is:- \n\n ${resetPasswordUrl}  \n\n If 
+  You've not requested this email then, please ignore it.`;
+
+  try {
+    await sendEmail({
+      email: user.email,
+      subject: `Personal Portfolio Dashboard Password Recovery`,
+      message,
+    });
+    res.status(201).json({
+      success: true,
+      message: `Email sent to ${user.email} successfully`,
+    });
+  } catch (error) {
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save();
+    return next(new ErrorHandler(error.message, 500));
+  }
 });
