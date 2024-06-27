@@ -1,6 +1,6 @@
 import app from "./app.js";
-
 import cloudinary from "cloudinary";
+
 const PORT = process.env.PORT || 4000;
 
 cloudinary.v2.config({
@@ -9,8 +9,6 @@ cloudinary.v2.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// middlewares
-
 app.get("/", (req, res, next) => {
   res.json({
     status: "success",
@@ -18,11 +16,11 @@ app.get("/", (req, res, next) => {
   });
 });
 
-app.use("*", (req, res, next) => {
-  const err = new Error("404 Page not found");
-  err.statusCode = 404;
-  next(err);
-});
+// app.use("*", (req, res, next) => {
+//   const err = new Error("404 Page not  found");
+//   err.statusCode = 404;
+//   next(err);
+// });
 
 app.use((error, req, res, next) => {
   console.log(error, "--------");

@@ -3,14 +3,14 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import fileUpload from "express-fileupload";
 import cors from "cors";
-import { connectDb } from "./src/config/connection.js";
-import { errorMiddleware } from "./src/middlewares/error.js";
-import messageRouter from "./src/router/messageRoutes.js";
-import userRouter from "./src/router/userRoutes.js";
-import timelineRouter from "./src/router/timelineRoutes.js";
-import applicationRouter from "./src/router/softwareApplicationRoutes.js";
-import skillRouter from "./src/router/skillRoutes.js";
-import projectRouter from "./src/router/projectRoutes.js";
+import dbConnection from "./database/connection.js";
+import { errorMiddleware } from "./middlewares/error.js";
+import userRouter from "./routes/userRouter.js";
+import timelineRouter from "./routes/timelineRouter.js";
+import messageRouter from "./routes/messageRouter.js";
+import skillRouter from "./routes/skillRouter.js";
+import softwareApplicationRouter from "./routes/softwareApplicationRouter.js";
+import projectRouter from "./routes/projectRouter.js";
 
 const app = express();
 
@@ -32,14 +32,15 @@ app.use(
     tempFileDir: "/tmp/",
   })
 );
-app.use("/api/v1/message", messageRouter);
+
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/timeline", timelineRouter);
-app.use("/api/v1/softwareapplication", applicationRouter);
+app.use("/api/v1/message", messageRouter);
 app.use("/api/v1/skill", skillRouter);
+app.use("/api/v1/softwareapplication", softwareApplicationRouter);
 app.use("/api/v1/project", projectRouter);
 
-connectDb();
+dbConnection();
 app.use(errorMiddleware);
 
 export default app;
