@@ -16,11 +16,11 @@ app.get("/", (req, res, next) => {
   });
 });
 
-// app.use("*", (req, res, next) => {
-//   const err = new Error("404 Page not  found");
-//   err.statusCode = 404;
-//   next(err);
-// });
+app.use("*", (req, res, next) => {
+  const err = new Error("404 Page not  found");
+  err.statusCode = 404;
+  next(err);
+});
 
 app.use((error, req, res, next) => {
   console.log(error, "--------");
